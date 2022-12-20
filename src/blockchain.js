@@ -67,7 +67,7 @@ class Blockchain {
         let newblock= block;
         let valid_block = await newblock.validate();
             try {
-                if (self.chain.length>-1) {
+                if (self.chain.length>0) {
                 // previous block hash
                 newblock.previousBlockHash = self.chain[self.chain.lenght-1].hash;
                 }
@@ -75,24 +75,25 @@ class Blockchain {
                 newblock.hash = SHA256(JSON.stringify(newblock)).toString();
                 
                 self.height = self.chain.length -1;
-                let valid_block = await newblock.validate();
+                let valid_block = await self.validateChain();
+                let errors = await self.validateChain();
 
                 if (!valid_block){
-                throw new Error("not valid")
+                    throw new Error("not valid")
+                    reject(valid.block)
 
+                }else{    
+
+                    throw new("block valid")
+                    self.chain.push(newblock);
+                    self.height++;
+                    resolve(newblock);
                 }    
-                throw new("block valid")
-                self.chain.push(newblock);
-                resolve(newblock);
                     
-                    
-                } catch(error){
-                    console.error(error);
-                    reject(error);
-                }
-                
-
-            
+                } catch(errors){
+                    console.error(errors);
+                    reject(errors);
+                }            
         });
     }
 
@@ -153,15 +154,7 @@ class Blockchain {
                     star
                 })
 
-            }
-
-              
-
-                    
-                
-            
-        
-
+            }      
         });
     }
 
@@ -262,6 +255,16 @@ class Blockchain {
                 block = newblock;
             }
             resolve(errorLog);
+        });
+    }
+    validateChainFS(){
+        this.app.get("/validateChain", async(req, res) =>{
+            let errorLog = await this.blockchain.validateChain();
+            if(errorLog.length!=0){
+                return res.status(500).send("Sadly the Blockchain is wrong");
+            }else{
+                return res.status(200).send("The Blockchain is validated");
+            }
         });
     }
 
