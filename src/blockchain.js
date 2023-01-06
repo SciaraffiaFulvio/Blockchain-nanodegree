@@ -223,48 +223,30 @@ class Blockchain {
      * 1. You should validate each block using `validateBlock`
      * 2. Each Block should check the with the previousBlockHash
      */
-    validateChain() {
+    async validateChain() {
         let self = this;
-        let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            let promises=[];
-            let block = self.chain[0];
-            let i = 1;
-            for (i<self.height; i++;) {
-                
-                let newblock = self.chain[i]
-
-                try {        
-                    let validBlock = await block.validate()
-
-                    if(!validBlock){
-
-                        errorLog.push("not valid block")
-                    
+            for (let i = 1; i < self.height; i++) {
+                let Blockcurrent = self.chain[i];
+                let Blockprevious = self.chain[i - 1];
+    
+                try {
+                    if (!await currentBlock.validate()) {
+                        reject(`the Block at index ${i} is not valid`);
+                        return;
                     }
-
-                    if (block.previousBlockHash != block.previousBlockHash){
-                        errorLog.push("not valid previous block")
+    
+                    if (currentBlock.prevHash !== previousBlock.hash) {
+                        reject(`Block at index ${i} has a not valid previous hash`);
+                        return;
                     }
-                
                 } catch(error) {
-                    HTMLFormControlsCollection.error(error);
+                    console.error(error);
                     reject(error);
                     return;
-                }   
-                block = newblock;
+                }
             }
-            resolve(errorLog);
-        });
-    }
-    validateChainFS(){
-        this.app.get("/validateChain", async(req, res) =>{
-            let errorLog = await this.blockchain.validateChain();
-            if(errorLog.length!=0){
-                return res.status(500).send("Sadly the Blockchain is wrong");
-            }else{
-                return res.status(200).send("The Blockchain is validated");
-            }
+            resolve(true);
         });
     }
 
