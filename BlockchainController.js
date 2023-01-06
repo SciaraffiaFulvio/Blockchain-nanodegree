@@ -118,6 +118,17 @@ class BlockchainController {
         });
     }
 
+    validateChainFS(){
+        this.app.get("/validateChain", async(req, res) =>{
+            let errorLog = await this.blockchain.validateChain();
+            if(errorLog.length!=0){
+                return res.status(500).send("Blockchain is wrong");
+            }else{
+                return res.status(200).send("Blockchain is ok");
+            }
+        });
+    }
+
 }
 
 module.exports = (app, blockchainObj) => { return new BlockchainController(app, blockchainObj);}
